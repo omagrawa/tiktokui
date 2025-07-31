@@ -1,0 +1,27 @@
+version: '3.8'
+
+services:
+  # React Frontend
+  tiktok-excel-uploader:
+    build: .
+    ports:
+      - "3001:80"  # Expose frontend on host at http://localhost:3001
+    environment:
+      - NODE_ENV=production
+      - REACT_APP_API_URL=http://backend:3000  # Correct service name usage
+    restart: unless-stopped
+    depends_on:
+      - backend
+
+  # Backend API (Node.js, Python, etc.)
+  backend:
+    image: tiktok_scrapper:latest
+    ports:
+      - "3000:3000"  # Expose API to host (optional, but good for debugging)
+    environment:
+      - NODE_ENV=production
+    restart: unless-stopped
+
+networks:
+  default:
+    driver: bridge
