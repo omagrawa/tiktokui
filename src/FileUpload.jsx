@@ -34,6 +34,7 @@ const FileUpload = () => {
   const [message, setMessage] = useState('');
   const [messageType, setMessageType] = useState('success'); // 'success' or 'error'
   const [showMessage, setShowMessage] = useState(false);
+  const [agentType, setAgentType] = useState('Both'); // 'Creator', 'Content', or 'Both'
 
 
   const handleFileChange = (e) => {
@@ -69,9 +70,13 @@ const FileUpload = () => {
     let successMessage = '';
     let errorMessage = '';
     
+    // Add agent type as a query parameter
+    const params = new URLSearchParams();
+    params.append('agent', agentType);
+    
     try {
       const response = await axios.post(
-        config.getApiUrl(config.UPLOAD_EXCEL),
+        `${config.getApiUrl(config.UPLOAD_EXCEL)}?${params.toString()}`,
         formData,
         {
           headers: {
@@ -297,6 +302,35 @@ const FileUpload = () => {
                           </Box>
                         )}
                         
+                        <Box sx={{ mt: 3, textAlign: 'left' }}>
+                          <Typography variant="body2" color="text.secondary" gutterBottom>
+                            Select Agent Type:
+                          </Typography>
+                          <Box sx={{ display: 'flex', gap: 3, flexWrap: 'wrap' }}>
+                            {['Creator', 'Content', 'Both'].map((type) => (
+                              <Box key={type} sx={{ display: 'flex', alignItems: 'center' }}>
+                                <input
+                                  type="radio"
+                                  id={`agent-${type.toLowerCase()}`}
+                                  name="agent-type"
+                                  value={type}
+                                  checked={agentType === type}
+                                  onChange={() => setAgentType(type)}
+                                  style={{ marginRight: '8px', cursor: 'pointer' }}
+                                />
+                                <label 
+                                  htmlFor={`agent-${type.toLowerCase()}`}
+                                  style={{ cursor: 'pointer' }}
+                                >
+                                  <Typography variant="body2" color="text.primary">
+                                    {type}
+                                  </Typography>
+                                </label>
+                              </Box>
+                            ))}
+                          </Box>
+                        </Box>
+                        
                         <Box mt={2}>
                           <label htmlFor="file-input">
                             <Button
@@ -338,7 +372,7 @@ const FileUpload = () => {
                         color="primary"
                         onClick={handleUpload}
                         disabled={!file || loading}
-                        endIcon={<CloudUploadIcon />}
+                        // endIcon={<CloudUploadIcon />}
                         size="large"
                         sx={{ 
                           py: 1.5, 
@@ -350,6 +384,7 @@ const FileUpload = () => {
                           '&:hover': {
                             backgroundColor: '#333333',
                             boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.15)',
+                            color:'black'
                           },
                           '&:disabled': {
                             backgroundColor: '#f3f4f6',

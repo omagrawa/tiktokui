@@ -219,7 +219,8 @@ const DataView = () => {
                 contentStatus: updatedJob.contentStatus?.toLowerCase(),
                 creatorStatus: updatedJob.creatorStatus?.toLowerCase(),
                 updatedAt: updatedJob.updatedAt,
-               
+                agents: updatedJob.agents?.toLowerCase(),
+
                 // Update completion-related fields if they exist
                 ...(updatedJob.tatalDataCount !== undefined && { tatalDataCount: updatedJob.tatalDataCount }),
                 ...(updatedJob.afterFilterdataCount !== undefined && { afterFilterdataCount: updatedJob.afterFilterdataCount }),
@@ -332,7 +333,7 @@ const DataView = () => {
     if (!window.confirm('Are you sure you want to delete this job?')) return;
     setDeletingJobId(jobId);
     try {
-      await axios.delete(config.getApiUrl(`/api/jobs?jobId=${jobId}`));
+      await axios.delete(`http://localhost:3000/api/jobs?jobId=${jobId}`);
       setAllJobs((prev) => prev.filter((job) => job._id !== jobId));
       setFilteredJobs((prev) => prev.filter((job) => job._id !== jobId));
     } catch (err) {
@@ -342,10 +343,10 @@ const DataView = () => {
     }
   };
 
-  const handleCreateCreatorJob = async (jobId) => {
+  const handleCreateCreatorJob = async (jobId, sheetType) => {
     setCreatingCreatorJobId(jobId);
     try {
-      const res =  await axios.get(config.getApiUrl(`/api/jobs/creator/${jobId}`));
+      const res =  await axios.get(`http://localhost:3000/api/jobs/creator/${jobId}/?sheetType=${sheetType}`);
       console.log('creator response', res);
       
       // Refresh the jobs data to get updated status
@@ -357,6 +358,42 @@ const DataView = () => {
       setCreatingCreatorJobId(null);
     }
   };
+
+const handleDownloadExcelAPI = async (jobId, sheetType) => {
+  setCreatingCreatorJobId(jobId);
+  try {
+    const res = await axios.get(`http://localhost:3000/api/jobs/sheet/?jobId=${jobId}&sheetType=${sheetType}`, {
+      responseType: 'blob' // Important: Tell axios to handle binary data
+    });
+    
+    // Create blob URL and trigger download
+    const blob = new Blob([res.data], { 
+      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' 
+    });
+    const url = window.URL.createObjectURL(blob);
+    
+    // Create temporary link element and trigger download
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `${sheetType}-data-${jobId}.xlsx`; // Set filename
+    document.body.appendChild(link);
+    link.click();
+    
+    // Cleanup
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(url);
+    
+    console.log('Excel file downloaded successfully');
+    
+    // Refresh the jobs data to get updated status
+    updateJobStatuses();
+  } catch (err) {
+    console.log('Error downloading Excel file:', err);
+    setError('Failed to download Excel file. Please try again.');
+  } finally {
+    setCreatingCreatorJobId(null);
+  }
+};
 
   if (loading) {
     return (
@@ -754,14 +791,40 @@ const DataView = () => {
                     );
                   }
                   if (col.key === 'action') {
-                    const isContentCompleted = job.contentStatus && String(job.contentStatus).toLowerCase() === 'completed';
-                    const isCreatorCompleted = job.creatorStatus && String(job.creatorStatus).toLowerCase() === 'completed';
-                    const showPlayIcon = job.finalSheetUrl && !job.creatorSheetUrl;
-                    
+                    const isContentCompleted = job.contentStatus && String(job.contentStatus).toLowerCase() === 'completed' || job.agents?.toLowerCase() == 'content' && job?.contentStatus?.toLowerCase() == 'completed';
+                    const isCreatorCompleted = job.creatorStatus && String(job.creatorStatus).toLowerCase() === 'completed' || job.agents?.toLowerCase() == 'creator' && job?.creatorStatus?.toLowerCase() == 'completed';
+                    const showPlayIcon = job.finalSheetUrl && !job.creatorSheetUrl || job.agents?.toLowerCase() == 'content' && job.contentStatus?.toLowerCase() == 'completed' && job?.agents?.toLowerCase() !== 'both';
+                    const contentShowPlayIcon =  job.creatorStatus?.toLowerCase() == 'completed' && job?.agents?.toLowerCase() == 'creator' && job?.agents?.toLowerCase() !== 'both'; ;
                     return (
                       <TableCell key={col.key}>
                         <Stack direction="row" spacing={1}>
-                          {isContentCompleted && job.finalSheetUrl && (
+
+                           {contentShowPlayIcon && (
+                            <Tooltip title="Create Creator Job">
+                              <IconButton
+                                size="small"
+                                sx={{ 
+                                  color: '#059669',
+                                  bgcolor: '#ecfdf5',
+                                  border: '1px solid #a7f3d0',
+                                  p: '4px',
+                                  '&:hover': {
+                                    bgcolor: '#d1fae5',
+                                    borderColor: '#6ee7b7',
+                                  }
+                                }}
+                                onClick={() => handleCreateCreatorJob(job._id, 'content')}
+                                disabled={creatingCreatorJobId === job._id}
+                              >
+                                {creatingCreatorJobId === job._id ? (
+                                  <CircularProgress size={16} color="inherit" />
+                                ) : (
+                                  <PlayArrowIcon fontSize="small" />
+                                )}
+                              </IconButton>
+                            </Tooltip>
+                          )}
+                          {isContentCompleted && (
                             <Tooltip title="View Content Sheet">
                               <IconButton
                                 size="small"
@@ -775,7 +838,7 @@ const DataView = () => {
                                     borderColor: '#9ca3af',
                                   }
                                 }}
-                                onClick={() => window.open(job.finalSheetUrl, '_blank')}
+                                onClick={() =>handleDownloadExcelAPI(job._id, 'content')}
                               >
                                 <TableRowsIcon fontSize="small" />
                               </IconButton>
@@ -795,7 +858,7 @@ const DataView = () => {
                                     borderColor: '#6ee7b7',
                                   }
                                 }}
-                                onClick={() => handleCreateCreatorJob(job._id)}
+                                onClick={() => handleCreateCreatorJob(job._id, 'creator')}
                                 disabled={creatingCreatorJobId === job._id}
                               >
                                 {creatingCreatorJobId === job._id ? (
@@ -806,7 +869,7 @@ const DataView = () => {
                               </IconButton>
                             </Tooltip>
                           )}
-                          {isCreatorCompleted && job.creatorSheetUrl && (
+                          {isCreatorCompleted && (
                             <Tooltip title="View Creator Sheet">
                               <IconButton
                                 size="small"
@@ -820,7 +883,7 @@ const DataView = () => {
                                     borderColor: '#9ca3af',
                                   }
                                 }}
-                                onClick={() => window.open(job.creatorSheetUrl, '_blank')}
+                                onClick={() =>handleDownloadExcelAPI(job._id, 'creator')}
                               >
                                 <GroupIcon fontSize="small" />
                               </IconButton>
