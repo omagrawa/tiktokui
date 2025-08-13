@@ -180,7 +180,12 @@ function NavigationTabs() {
     >
       <Tab icon={<CloudUploadIcon sx={{ mb: 0.5, fontSize: '1.1rem' }} />} iconPosition="start" label="Upload Excel" />
       <Tab icon={<TableViewIcon sx={{ mb: 0.5, fontSize: '1.1rem' }} />} iconPosition="start" label="View Data" />
-      {/* <Tab icon={<SettingsIcon sx={{ mb: 0.5, fontSize: '1.1rem' }} />} iconPosition="start" label="Settings" /> */}
+      <Tab 
+        icon={<SettingsIcon sx={{ mb: 0.5, fontSize: '1.1rem' }} />} 
+        iconPosition="start" 
+        label="Settings"
+        onClick={() => navigate('/settings')}
+      />
     </Tabs>
   );
 }
