@@ -40,6 +40,7 @@ import CloseIcon from '@mui/icons-material/Close';
 import SettingsIcon from '@mui/icons-material/Settings';
 import IntegrationInstructionsIcon from '@mui/icons-material/IntegrationInstructions';
 import StorageIcon from '@mui/icons-material/Storage';
+import config from './config';
 
 const Settings = () => {
   const [googleEnabled, setGoogleEnabled] = useState(false);
@@ -79,7 +80,7 @@ const Settings = () => {
     try {
       setLoading(true);
       setError(null);
-      const response = await fetch('http://localhost:3000/api/environment');
+      const response = await fetch(config.getApiUrl(`/api/environment`));
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
@@ -162,7 +163,7 @@ const Settings = () => {
       } else {
         // Existing variable - make API call to update
         try {
-          const response = await fetch(`http://localhost:3000/api/environment/${id}`, {
+          const response = await fetch(config.getApiUrl(`/api/environment/${id}`), {
             method: 'PATCH',
             headers: {
               'Content-Type': 'application/json',

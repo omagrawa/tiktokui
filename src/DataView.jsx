@@ -333,7 +333,7 @@ const DataView = () => {
     if (!window.confirm('Are you sure you want to delete this job?')) return;
     setDeletingJobId(jobId);
     try {
-      await axios.delete(`http://localhost:3000/api/jobs?jobId=${jobId}`);
+      await axios.delete(config.getApiUrl(`/api/jobs?jobId=${jobId}`));
       setAllJobs((prev) => prev.filter((job) => job._id !== jobId));
       setFilteredJobs((prev) => prev.filter((job) => job._id !== jobId));
     } catch (err) {
@@ -346,7 +346,7 @@ const DataView = () => {
   const handleCreateCreatorJob = async (jobId, sheetType) => {
     setCreatingCreatorJobId(jobId);
     try {
-      const res =  await axios.get(`http://localhost:3000/api/jobs/creator/${jobId}/?sheetType=${sheetType}`);
+      const res =  await axios.get(config.getApiUrl(`/api/jobs/creator/${jobId}/?sheetType=${sheetType}`));
       console.log('creator response', res);
       
       // Refresh the jobs data to get updated status
@@ -362,7 +362,7 @@ const DataView = () => {
 const handleDownloadExcelAPI = async (jobId, sheetType) => {
   setCreatingCreatorJobId(jobId);
   try {
-    const res = await axios.get(`http://localhost:3000/api/jobs/sheet/?jobId=${jobId}&sheetType=${sheetType}`, {
+    const res = await axios.get(config.getApiUrl(`/api/jobs/sheet/?jobId=${jobId}&sheetType=${sheetType}`), {
       responseType: 'blob' // Important: Tell axios to handle binary data
     });
     
