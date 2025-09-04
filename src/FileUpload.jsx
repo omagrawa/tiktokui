@@ -55,6 +55,16 @@ const FileUpload = () => {
     document.body.removeChild(link);
   };
 
+  const handleDownloadCreatorTemplate = (e) => {
+    // Create a link element and trigger download
+    e.preventDefault();
+    const link = document.createElement('a');
+    link.href = '/template_for_job_creator.xlsx';
+    link.download = 'template_for_job_creator.xlsx';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
   const handleUpload = async (e) => {
   
     if (!file) return;
@@ -211,7 +221,7 @@ const FileUpload = () => {
                           Download our standardized Excel template for properly formatted data
                         </Typography>
                       </Box>
-                      
+                      <div>
                       <Button
                         variant="outlined"
                         startIcon={<DownloadIcon />}
@@ -231,8 +241,32 @@ const FileUpload = () => {
                           }
                         }}
                       >
-                        Download Template
+                        Download Content Template
                       </Button>
+
+                      <Button
+                        variant="outlined"
+                        startIcon={<DownloadIcon />}
+                        onClick={handleDownloadCreatorTemplate}
+                        size="large"
+                        sx={{ 
+                          py: 1.2,
+                          borderRadius: 1.5,
+                          fontWeight: 500,
+                          backgroundColor: '#ffffff',
+                          color: '#1a1a1a',
+                          border: '1px solid #d1d5db',
+                          marginLeft: '10px',
+                          '&:hover': {
+                            backgroundColor: '#f9fafb',
+                            borderColor: '#9ca3af',
+                            boxShadow: '0px 1px 3px rgba(0, 0, 0, 0.1)',
+                          }
+                        }}
+                      >
+                        Download Creator Template
+                      </Button>
+                      </div>
                     </Stack>
                   </Paper>
                 </Grid>

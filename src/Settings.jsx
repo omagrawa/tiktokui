@@ -80,7 +80,7 @@ const Settings = () => {
     try {
       setLoading(true);
       setError(null);
-      const response = await fetch(config.getApiUrl(`/api/environment`));
+      const response = await fetch(config.getApiUrl('/api/environment'));
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
