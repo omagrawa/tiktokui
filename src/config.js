@@ -2,7 +2,7 @@
 const config = {
   // API base URL - will use environment variable or fallback to localhost
   //  API_BASE_URL:ticktokbackend-production-df37.up.railway.app,
-  API_BASE_URL: import.meta.env.VITE_API_URL || 'https://ticktokbackend-production.up.railway.app',
+  API_BASE_URL: import.meta.env.VITE_API_URL || 'https://airy-creativity-production-289e.up.railway.app',
   
   // API endpoints
   UPLOAD_EXCEL: '/api/upload-excel',
