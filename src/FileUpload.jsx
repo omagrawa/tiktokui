@@ -56,15 +56,28 @@ const FileUpload = () => {
   };
 
   const handleDownloadCreatorTemplate = (e) => {
-    // Create a link element and trigger download
     e.preventDefault();
+    
+    // Create a temporary link element
     const link = document.createElement('a');
-    link.href = '/template_for_job_creator.xlsx';
-    link.download = 'template_for_job_creator.xlsx';
+    
+    // Set the href to the direct path in the public folder
+    link.href = '/Creator.xlsx';
+    
+    // Set the download attribute with the desired filename
+    link.download = 'Creator_Template.xlsx';
+    
+    // Append to body, trigger download, and remove
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+    
+    // Show success message
+    setMessage('Template download started');
+    setMessageType('success');
+    setShowMessage(true);
   };
+
   const handleUpload = async (e) => {
   
     if (!file) return;
