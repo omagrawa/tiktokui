@@ -48,8 +48,8 @@ const FileUpload = () => {
     // Create a link element and trigger download
     e.preventDefault();
     const link = document.createElement('a');
-    link.href = '/template_for_job.xlsx';
-    link.download = 'template_for_job.xlsx';
+    link.href = '/Content_Scout.xlsx';
+    link.download = 'Content Scout.xlsx';
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -62,10 +62,10 @@ const FileUpload = () => {
     const link = document.createElement('a');
     
     // Set the href to the direct path in the public folder
-    link.href = '/Creator.xlsx';
+    link.href = '/Creator_Scout.xlsx';
     
     // Set the download attribute with the desired filename
-    link.download = 'Creator_Template.xlsx';
+    link.download = 'Creator Scout.xlsx';
     
     // Append to body, trigger download, and remove
     document.body.appendChild(link);
