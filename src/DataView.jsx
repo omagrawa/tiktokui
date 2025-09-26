@@ -32,6 +32,7 @@ import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import FilterListIcon from '@mui/icons-material/FilterList';
 import RefreshIcon from '@mui/icons-material/Refresh';
+import ErrorIcon from '@mui/icons-material/Error';
 import axios from 'axios';
 import config from './config';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -62,7 +63,7 @@ const columns = [
   { key: 'createdAt', label: 'Created', sortable: true },
   { key: 'updatedAt', label: 'Updated', sortable: true },
   { key: 'apifyDatasetId', label: 'Apify Info', sortable: false },
-  { key: 'action', label: 'Action', sortable: false }
+  { key: 'action', label: 'Actions', sortable: false }
 ];
 
 const DataView = () => {
@@ -677,22 +678,24 @@ const handleDownloadExcelAPI = async (jobId, sheetType) => {
                     let displayValue = null;
                     let isFailedStatus = false;
                     let failureMessage = null;
+
+                    console.log('job status', job.contentStatus, job.creatorStatus, job.finalSheetUrl, job.failedMessagge, job.creatorErrorMessage);
                     
                     if (col.key === 'contentStatus') {
                       if (job.contentStatus?.toLowerCase() !== "failed" && job.contentStatus) {
                         displayValue = job.contentStatus?.toLowerCase();
-                      } else if (job.contentStatus?.toLowerCase() === "failed" && !job.finalSheetUrl) {
+                      } else if (job.contentStatus?.toLowerCase() === "failed") {
                         displayValue = "failed";
                         isFailedStatus = true;
-                        failureMessage = job.failedMessagge || 'Unknown error';
+                        failureMessage = job.failedMessagge || job.failedMessage ||'Unknown error';
                       }
                     } else if (col.key === 'creatorStatus') {
-                      if (job.creatorStatus?.toLowerCase() !== "failed" && job.creatorStatus) {
+                      if (job.creatorStatus?.toLowerCase() !== "failed" ) {
                         displayValue = job.creatorStatus;
-                      } else if (job.creatorStatus?.toLowerCase() === "failed" && job.finalSheetUrl) {
+                      } else if (job.creatorStatus?.toLowerCase() === "failed") {
                         displayValue = "failed";
                         isFailedStatus = true;
-                        failureMessage = job.creatorErrorMessage || 'Unknown error';
+                        failureMessage = job.creatorErrorMessage || job.failedMessage || job.failedMessagge|| 'Unknown error';
                       }
                     }
                     
@@ -794,10 +797,12 @@ const handleDownloadExcelAPI = async (jobId, sheetType) => {
                     const isContentCompleted = job.contentStatus && String(job.contentStatus).toLowerCase() === 'completed' || job.agents?.toLowerCase() == 'content' && job?.contentStatus?.toLowerCase() == 'completed';
                     const isCreatorCompleted = job.creatorStatus && String(job.creatorStatus).toLowerCase() === 'completed' || job.agents?.toLowerCase() == 'creator' && job?.creatorStatus?.toLowerCase() == 'completed';
                     const showPlayIcon = job.finalSheetUrl && !job.creatorSheetUrl || job.agents?.toLowerCase() == 'content' && job.contentStatus?.toLowerCase() == 'completed' && job?.agents?.toLowerCase() !== 'both';
-                    const contentShowPlayIcon =  job.creatorStatus?.toLowerCase() == 'completed' && job?.agents?.toLowerCase() == 'creator' && job?.agents?.toLowerCase() !== 'both'; ;
+                    const contentShowPlayIcon = job.creatorStatus?.toLowerCase() == 'completed' && job?.agents?.toLowerCase() == 'creator' && job?.agents?.toLowerCase() !== 'both';
+                    const errorMessage = job.failedMessagge || job.failedMessage || job.creatorErrorMessage;
+                    
                     return (
                       <TableCell key={col.key}>
-                        <Stack direction="row" spacing={1}>
+                        <Stack direction="row" spacing={1} alignItems="center">
 
                            {contentShowPlayIcon && (
                             <Tooltip title="Create Creator Job">
@@ -912,6 +917,32 @@ const handleDownloadExcelAPI = async (jobId, sheetType) => {
                               )}
                             </IconButton>
                           </Tooltip>
+                          
+                          {errorMessage && (
+                            <Tooltip 
+                              title={
+                                <Box sx={{ p: 1, maxWidth: 300 }}>
+                                  <Typography variant="caption" component="div" sx={{ fontWeight: 'bold', mb: 0.5 }}>Error Details:</Typography>
+                                  <Typography variant="caption" component="div" sx={{ whiteSpace: 'pre-wrap' }}>{errorMessage}</Typography>
+                                </Box>
+                              }
+                              arrow
+                              placement="top"
+                            >
+                              <ErrorIcon 
+                                color="error" 
+                                fontSize="small"
+                                sx={{ 
+                                  cursor: 'pointer',
+                                  ml: 1,
+                                  '&:hover': {
+                                    transform: 'scale(1.2)',
+                                    transition: 'transform 0.2s ease-in-out'
+                                  }
+                                }}
+                              />
+                            </Tooltip>
+                          )}
                         </Stack>
                       </TableCell>
                     );
